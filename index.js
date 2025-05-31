@@ -20,10 +20,16 @@ fs.mkdirSync(zipDirectory, { recursive: true });
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+app.options('/api/convert', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.sendStatus(200);
+});
+
 // ルートエンドポイント
 app.post('/api/convert', upload.array('images'), async (req, res) => {
     ApiRateCount++; // APIへのアクセス数をカウント
-    res.setHeader('Access-Control-Allow-Origin', '*');
     try {
         if (!req.files || req.files.length === 0) {
             return res.status(400).send('No images uploaded.');
