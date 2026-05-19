@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY go.mod ./
-RUN go mod tidy
+RUN go mod download
 
 COPY main.go ./
 RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o server .
