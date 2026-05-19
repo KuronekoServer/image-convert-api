@@ -1,20 +1,33 @@
-# ベースイメージを指定
-FROM node:lts
+# ビルドステージ
+FROM golang:1.26-bookworm AS builder
 
-# コンテナ内の作業ディレクトリを設定
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libvips-dev \
+    librsvg2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# ローカルのpackage.jsonとpackage-lock.jsonをコンテナ内の作業ディレクトリにコピー
-COPY package*.json ./
+COPY go.mod ./
+RUN go mod tidy
 
-# npmパッケージのインストール
-RUN npm install
+COPY main.go ./
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o server .
 
-# ローカルのソースコードをコンテナ内の作業ディレクトリにコピー
-COPY . .
+# 実行ステージ
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libvips42 \
+    librsvg2-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /app/server .
 
 # コンテナのポートを公開
 EXPOSE 12901
 
 # アプリケーションの起動コマンドを指定
-CMD [ "node", "index.js" ]
+CMD ["./server"]

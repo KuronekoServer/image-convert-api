@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "@hono/node-server": "^2.0.0",
-    "adm-zip": "^0.5.17",
-    "hono": "^4.12.15",
-    "sharp": "^0.34.5"
-  }
-}
