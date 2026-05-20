@@ -11,7 +11,7 @@ WORKDIR /app
 COPY go.mod ./
 RUN go mod download
 
-COPY main.go ./
+COPY main.go openapi.yml ./
 RUN CGO_ENABLED=1 go build -mod=mod -ldflags="-s -w" -o server .
 
 # 実行ステージ
