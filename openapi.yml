@@ -1,0 +1,77 @@
+openapi: "3.0.3"
+info:
+  title: Image Convert API
+  version: "1.0.0"
+  description: 画像変換 API
+
+paths:
+  /api/convert:
+    post:
+      summary: 画像を指定フォーマットに変換する
+      parameters:
+        - in: query
+          name: toFormat
+          schema:
+            type: string
+            enum: [webp, jpg, jpeg, png, gif, tif, tiff, avif, heif, heic]
+            default: webp
+          description: 変換先フォーマット（省略時は webp）
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - images
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: 変換する画像ファイル（複数指定可）
+      responses:
+        "200":
+          description: 変換成功。1 枚の場合は画像ファイル、複数枚の場合は ZIP を返す
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+                description: 変換後の画像（1 枚のみアップロード時）
+            application/zip:
+              schema:
+                type: string
+                format: binary
+                description: 変換後の画像を格納した ZIP（複数枚アップロード時）
+        "400":
+          description: 不正なリクエスト（画像未指定、未対応フォーマットなど）
+        "405":
+          description: POST 以外のメソッドを使用した場合
+        "500":
+          description: サーバーエラー（変換失敗など）
+
+  /health:
+    get:
+      summary: ヘルスチェック
+      responses:
+        "200":
+          description: サーバー正常
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /metrics:
+    get:
+      summary: メトリクス取得
+      responses:
+        "200":
+          description: API 呼び出し回数などのメトリクス情報
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "ApiRateCount 42"
